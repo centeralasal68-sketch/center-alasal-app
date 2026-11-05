@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Home textile and furnishing item in Center Al Assal store",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Product display name in Arabic" },
+        "description": { "type": "string", "description": "Full product description" },
+        "category": { "type": "string", "description": "Category name" },
+        "basePrice": { "type": "number", "description": "Current selling price in EGP" },
+        "originalPrice": { "type": "number", "description": "Original price before discount" },
+        "discountPercent": { "type": "integer", "description": "Discount percentage 0 to 100" },
+        "images": { "type": "array", "description": "List of image URLs" },
+        "sizes": { "type": "array", "description": "Available dimensions/sizes" },
+        "colors": { "type": "array", "description": "Available color variants" },
+        "materials": { "type": "string", "description": "Fabric and materials specification" },
+        "stock": { "type": "integer", "description": "Available inventory units" },
+        "isAvailable": { "type": "boolean", "description": "Whether product is active for purchase" },
+        "sku": { "type": "string", "description": "Stock Keeping Unit identifier" },
+        "rating": { "type": "number", "description": "Average customer rating 1.0 to 5.0" },
+        "reviewsCount": { "type": "integer", "description": "Total reviews count" },
+        "badge": { "type": "string", "description": "Display badge: جديد, مميز, الأكثر مبيعاً, or عادي" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp" }
+      },
+      "required": ["name", "category", "basePrice", "stock", "isAvailable", "sku", "createdAt", "updatedAt"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category for furnishings and textiles",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Category name" },
+        "iconName": { "type": "string", "description": "Identifier for icon display" },
+        "imageUrl": { "type": "string", "description": "Category banner or thumbnail URL" },
+        "description": { "type": "string", "description": "Short category description" },
+        "sortOrder": { "type": "integer", "description": "Display order index" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp" }
+      },
+      "required": ["name", "sortOrder", "createdAt", "updatedAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase order in Center Al Assal",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID of customer" },
+        "customerName": { "type": "string", "description": "Full customer name" },
+        "customerPhone": { "type": "string", "description": "Contact telephone or mobile number" },
+        "governorate": { "type": "string", "description": "Governorate (e.g., Alexandria, Cairo)" },
+        "city": { "type": "string", "description": "District or city" },
+        "address": { "type": "string", "description": "Detailed street address" },
+        "notes": { "type": "string", "description": "Customer delivery instructions" },
+        "items": { "type": "array", "description": "List of ordered items with quantity, price, options" },
+        "subtotal": { "type": "number", "description": "Subtotal before shipping" },
+        "shippingFee": { "type": "number", "description": "Shipping cost in EGP" },
+        "total": { "type": "number", "description": "Final total in EGP" },
+        "paymentMethod": { "type": "string", "description": "cash_on_delivery, instapay, or wallet" },
+        "paymentProofUrl": { "type": "string", "description": "URL to transfer receipt screenshot" },
+        "paymentStatus": { "type": "string", "description": "pending, verified, or rejected" },
+        "status": { "type": "string", "description": "Order status: جديد, قيد المراجعة, تم التأكيد, قيد التجهيز, تم الشحن, تم التسليم, ملغي, مرتجع" },
+        "internalNotes": { "type": "string", "description": "Staff administrative notes" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp" }
+      },
+      "required": ["userId", "customerName", "customerPhone", "governorate", "address", "items", "subtotal", "shippingFee", "total", "paymentMethod", "paymentStatus", "status", "createdAt", "updatedAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Registered user profile",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "email": { "type": "string", "description": "Email address" },
+        "phoneNumber": { "type": "string", "description": "Mobile phone" },
+        "role": { "type": "string", "description": "Customer or administrative role" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp" }
+      },
+      "required": ["userId", "createdAt", "updatedAt"]
+    },
+    "CartItem": {
+      "title": "CartItem",
+      "description": "Item in customer shopping cart",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "description": "Referenced product ID" },
+        "title": { "type": "string", "description": "Product title" },
+        "price": { "type": "number", "description": "Unit price at addition time" },
+        "imageUrl": { "type": "string", "description": "Thumbnail image URL" },
+        "quantity": { "type": "integer", "description": "Number of units" },
+        "selectedSize": { "type": "string", "description": "Chosen dimension/size" },
+        "selectedColor": { "type": "string", "description": "Chosen color option" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Update timestamp" }
+      },
+      "required": ["productId", "title", "price", "quantity", "createdAt", "updatedAt"]
+    },
+    "WishlistItem": {
+      "title": "WishlistItem",
+      "description": "Saved favorite product for customer",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "description": "Referenced product ID" },
+        "title": { "type": "string", "description": "Product title" },
+        "price": { "type": "number", "description": "Product price" },
+        "imageUrl": { "type": "string", "description": "Thumbnail URL" },
+        "category": { "type": "string", "description": "Product category" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Saved timestamp" }
+      },
+      "required": ["productId", "title", "price", "createdAt"]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Global store configuration and information",
+      "type": "object",
+      "properties": {
+        "storeName": { "type": "string", "description": "Brand name" },
+        "phones": { "type": "array", "description": "Contact phone numbers" },
+        "branches": { "type": "array", "description": "Branch locations details" },
+        "paymentInstructions": { "type": "string", "description": "Instructions for manual payments" },
+        "instapayInfo": { "type": "string", "description": "InstaPay address and phone" },
+        "walletInfo": { "type": "string", "description": "E-wallet mobile numbers" },
+        "shippingRules": { "type": "string", "description": "Shipping costs and delivery times" },
+        "returnPolicy": { "type": "string", "description": "Return and exchange conditions" },
+        "aiConfig": { "type": "string", "description": "AI Assistant instructions and settings" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["storeName", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Public catalog of furnishing and textile products"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Categories for home furnishings"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders with status CAA-2026-XXXXX"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile with personal contact data"
+    },
+    "/users/{userId}/cart/{itemId}": {
+      "schema": "CartItem",
+      "description": "Customer shopping cart subcollection"
+    },
+    "/users/{userId}/wishlist/{productId}": {
+      "schema": "WishlistItem",
+      "description": "Customer wishlist subcollection"
+    },
+    "/store_settings/{settingId}": {
+      "schema": "StoreSettings",
+      "description": "Store contact info, policies, branches, and AI settings"
+    }
+  }
+}

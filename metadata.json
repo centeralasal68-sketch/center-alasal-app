@@ -1,0 +1,6 @@
+{
+  "name": "Center Al Assal",
+  "description": "تطبيق سنتر العسال لتجارة المفروشات الفاخرة - تسوق الملايات والبطاطين واللحاف والمفارش مع مساعد ASSAL AI الذكي ولوحة تحكم متكاملة",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

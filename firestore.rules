@@ -1,0 +1,200 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Primitives & Auth Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == "centeralasal68@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    // --- Entity Validation Helpers ---
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             data.category is string && data.category.size() > 0 && data.category.size() <= 100 &&
+             (data.basePrice is number || data.basePrice is int) && data.basePrice >= 0 &&
+             data.stock is int && data.stock >= 0 &&
+             data.isAvailable is bool &&
+             data.sku is string && data.sku.size() <= 100 &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 5000)) &&
+             (!('originalPrice' in data) || (data.originalPrice is number || data.originalPrice is int)) &&
+             (!('discountPercent' in data) || (data.discountPercent is int && data.discountPercent >= 0 && data.discountPercent <= 100)) &&
+             (!('materials' in data) || (data.materials is string && data.materials.size() <= 500)) &&
+             (!('rating' in data) || (data.rating is number && data.rating >= 0 && data.rating <= 5)) &&
+             (!('reviewsCount' in data) || (data.reviewsCount is int && data.reviewsCount >= 0)) &&
+             (!('badge' in data) || (data.badge is string && data.badge.size() <= 50)) &&
+             (!('images' in data) || (data.images is list && data.images.size() <= 15)) &&
+             (!('sizes' in data) || (data.sizes is list && data.sizes.size() <= 20)) &&
+             (!('colors' in data) || (data.colors is list && data.colors.size() <= 20));
+    }
+
+    function isValidCategory(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.sortOrder is int &&
+             (!('iconName' in data) || (data.iconName is string && data.iconName.size() <= 100)) &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 1000)) &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 1000));
+    }
+
+    function isValidOrder(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+             data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 150 &&
+             data.customerPhone is string && data.customerPhone.size() >= 8 && data.customerPhone.size() <= 25 &&
+             data.governorate is string && data.governorate.size() <= 100 &&
+             data.address is string && data.address.size() > 0 && data.address.size() <= 500 &&
+             (data.subtotal is number || data.subtotal is int) && data.subtotal >= 0 &&
+             (data.shippingFee is number || data.shippingFee is int) && data.shippingFee >= 0 &&
+             (data.total is number || data.total is int) && data.total >= 0 &&
+             data.paymentMethod is string && (data.paymentMethod in ['cash_on_delivery', 'instapay', 'wallet']) &&
+             data.paymentStatus is string && (data.paymentStatus in ['pending', 'verified', 'rejected']) &&
+             data.status is string && data.status.size() <= 50 &&
+             data.items is list && data.items.size() > 0 && data.items.size() <= 50 &&
+             (!('city' in data) || (data.city is string && data.city.size() <= 100)) &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000)) &&
+             (!('internalNotes' in data) || (data.internalNotes is string && data.internalNotes.size() <= 2000)) &&
+             (!('paymentProofUrl' in data) || (data.paymentProofUrl is string && data.paymentProofUrl.size() <= 1500));
+    }
+
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 150)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 150)) &&
+             (!('phoneNumber' in data) || (data.phoneNumber is string && data.phoneNumber.size() <= 30)) &&
+             (!('role' in data) || (data.role is string && data.role.size() <= 50));
+    }
+
+    function isValidCartItem(data) {
+      return data.productId is string && data.productId.size() <= 128 &&
+             data.title is string && data.title.size() <= 200 &&
+             (data.price is number || data.price is int) && data.price >= 0 &&
+             data.quantity is int && data.quantity > 0 && data.quantity <= 100 &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 1000)) &&
+             (!('selectedSize' in data) || (data.selectedSize is string && data.selectedSize.size() <= 50)) &&
+             (!('selectedColor' in data) || (data.selectedColor is string && data.selectedColor.size() <= 50));
+    }
+
+    function isValidWishlistItem(data) {
+      return data.productId is string && data.productId.size() <= 128 &&
+             data.title is string && data.title.size() <= 200 &&
+             (data.price is number || data.price is int) && data.price >= 0 &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 1000)) &&
+             (!('category' in data) || (data.category is string && data.category.size() <= 100));
+    }
+
+    function isValidStoreSettings(data) {
+      return data.storeName is string && data.storeName.size() <= 150;
+    }
+
+    // --- Collections ---
+
+    // 1. Products (Public read for browsing, Admin write)
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidProduct(incoming()) && incoming().createdAt is timestamp && incoming().createdAt <= request.time;
+      allow update: if isAdmin() && isValidProduct(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if isAdmin();
+    }
+
+    // 2. Categories (Public read, Admin write)
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidCategory(incoming()) && incoming().createdAt is timestamp && incoming().createdAt <= request.time;
+      allow update: if isAdmin() && isValidCategory(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if isAdmin();
+    }
+
+    // 3. Orders (Scoped by customer userId, or Admin)
+    match /orders/{orderId} {
+      allow get: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() &&
+                       incoming().userId == request.auth.uid &&
+                       isValidOrder(incoming()) &&
+                       incoming().createdAt is timestamp &&
+                       incoming().createdAt <= request.time;
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (resource.data.userId == request.auth.uid &&
+         incoming().userId == resource.data.userId &&
+         incoming().createdAt == resource.data.createdAt &&
+         isValidOrder(incoming()) &&
+         incoming().diff(resource.data).affectedKeys().hasOnly(['status', 'paymentProofUrl', 'notes', 'updatedAt']))
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 4. Users (User ownership isolation)
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isOwner(userId) &&
+                       incoming().userId == userId &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().createdAt is timestamp &&
+                       incoming().createdAt <= request.time;
+      allow update: if isOwner(userId) &&
+                       incoming().userId == userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'phoneNumber', 'role', 'updatedAt']);
+      allow delete: if isOwner(userId) || isAdmin();
+
+      // Cart subcollection
+      match /cart/{itemId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidCartItem(incoming()) && incoming().createdAt is timestamp && incoming().createdAt <= request.time;
+        allow update: if isOwner(userId) && isValidCartItem(incoming()) && incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(userId);
+      }
+
+      // Wishlist subcollection
+      match /wishlist/{productId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidWishlistItem(incoming()) && incoming().createdAt is timestamp && incoming().createdAt <= request.time;
+        allow update: if isOwner(userId) && isValidWishlistItem(incoming());
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // 5. Store Settings (Public read, Admin write)
+    match /store_settings/{settingId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin() && isValidStoreSettings(incoming());
+    }
+
+    // 6. Admins collection
+    match /admins/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}
